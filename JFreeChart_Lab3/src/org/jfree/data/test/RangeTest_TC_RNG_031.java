@@ -12,7 +12,7 @@ public class RangeTest_TC_RNG_031 {
             // Attempt to shift a null range by 5
             Range shiftedRange = Range.shift(null, 5.0);
             fail("Shifting a null Range should throw a NullPointerException.");
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Handled null range shift: " + e.getMessage());
             assertNotNull("NullPointerException should be thrown for null input", e);
         }
