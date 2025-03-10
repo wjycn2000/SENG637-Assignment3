@@ -22,7 +22,7 @@ public class RangeTest_TC_RNG_020 {
         double upperBound = largeRange.getUpperBound();
 
         long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // Convert to milliseconds
+        long duration = (endTime - startTime) / 1000000; // Convert to milliseconds
 
         // Expected upper bound is 1e9
         assertEquals("Upper bound of Range(-1e9,1e9) should be 1e9", 

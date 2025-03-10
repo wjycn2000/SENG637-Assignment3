@@ -33,7 +33,7 @@ public class RangeTest_TC_RNG_024 {
         }
 
         long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // Convert to milliseconds
+        long duration = (endTime - startTime) / 1000000; // Convert to milliseconds
 
         // Print execution time for performance evaluation
         System.out.println("Execution time for generating 100,000 hash codes: " + duration + " ms");

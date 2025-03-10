@@ -22,7 +22,7 @@ public class RangeTest_TC_RNG_016 {
         double lowerBound = largeRange.getLowerBound();
 
         long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // Convert to milliseconds
+        long duration = (endTime - startTime) / 1000000; // Convert to milliseconds
 
         // Expected lower bound is -1e9
         assertEquals("Lower bound of Range(-1e9,1e9) should be -1e9", 

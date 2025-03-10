@@ -22,7 +22,7 @@ public class RangeTest_TC_RNG_008 {
         Range expandedRange = Range.expand(largeRange, 0.5, 0.5);
 
         long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // Convert to milliseconds
+        long duration = (endTime - startTime) / 1000000; // Convert to milliseconds
 
         // Expected lower bound: -1e9 - (2e9 * 0.5) = -2e9
         // Expected upper bound: 1e9 + (2e9 * 0.5) = 2e9

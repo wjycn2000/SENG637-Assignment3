@@ -44,7 +44,7 @@ public class DataUtilitiesTest_TC_DU_004 {
         double result = DataUtilities.calculateColumnTotal(largeDataset, COLUMN_INDEX);
 
         long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // Convert to milliseconds
+        long duration = (endTime - startTime) / 1000000; // Convert to milliseconds
 
         // Verify the sum
         assertEquals("The sum of column 3 should match the expected sum", expectedSum, result, 0.000000001d);
