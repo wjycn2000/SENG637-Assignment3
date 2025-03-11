@@ -633,4 +633,364 @@ public class RangeTest {
         assertEquals("Length of Range(0.0001,0.0005) should be 0.0004", 
                      0.0004, range.getLength(), 0.000000001d);
     }
+    
+//////////////////////////////////////
+///
+///    
+
+    @Test
+    public void testGetLowerBound() {
+        Range r = new Range(5, 10);
+        assertEquals(5, r.getLowerBound(), 0.0001);
+    }
+
+    @Test
+    public void testGetUpperBound() {
+        Range r = new Range(5, 10);
+        assertEquals(10, r.getUpperBound(), 0.0001);
+    }
+
+    @Test
+    public void testGetLength() {
+        Range r = new Range(3, 8);
+        assertEquals(5, r.getLength(), 0.0001);
+    }
+
+    @Test
+    public void testContains_ValueWithinRange_ShouldReturnTrue() {
+        Range r = new Range(1, 5);
+        assertTrue(r.contains(3));
+    }
+
+    @Test
+    public void testContains_ValueBelowRange_ShouldReturnFalse() {
+        Range r = new Range(1, 5);
+        assertFalse(r.contains(0));
+    }
+
+    @Test
+    public void testContains_ValueAboveRange_ShouldReturnFalse() {
+        Range r = new Range(1, 5);
+        assertFalse(r.contains(6));
+    }
+
+    @Test
+    public void testShift_PositiveDelta_ShouldMoveRange() {
+        Range r = new Range(2, 6);
+        Range shifted = Range.shift(r, 3);
+        assertEquals(new Range(5, 9), shifted);
+    }
+
+    @Test
+    public void testShift_NegativeDelta_ShouldMoveRangeLeft() {
+        Range r = new Range(2, 6);
+        Range shifted = Range.shift(r, -3);
+        assertEquals(new Range(-1, 3), shifted);
+    }
+    
+    @Test
+    public void testShift_ZeroCrossingAllowed() {
+        Range r = new Range(-3, 5);
+        Range shifted = Range.shift(r, 4, true);
+        assertEquals(new Range(1, 9), shifted);
+    }
+
+    @Test
+    public void testShift_ZeroCrossingDisallowed_ShouldNotGoNegative() {
+        Range r = new Range(-3, 5);
+        Range shifted = Range.shift(r, 4, false);
+        assertEquals(new Range(0, 9), shifted);
+    }
+
+    @Test
+    public void testScale_PositiveFactor_ShouldStretchRange() {
+        Range r = new Range(2, 6);
+        Range scaled = Range.scale(r, 2);
+        assertEquals(new Range(4, 12), scaled);
+    }
+
+    /*@Test
+    public void testScale_ZeroFactor_ShouldThrowException() {
+        Range r = new Range(2, 6);
+        try {
+            Range.scale(r, 0);
+            fail("Expected exception when scaling by zero");
+        } catch (IllegalArgumentException e) {
+            // Expected behavior
+        }
+    }*/
+
+    @Test
+    public void testExpandToInclude_ValueWithinRange_ShouldRemainSame() {
+        Range r = new Range(5, 15);
+        Range expanded = Range.expandToInclude(r, 10);
+        assertEquals(new Range(5, 15), expanded);
+    }
+
+    @Test
+    public void testExpandToInclude_ValueAboveRange_ShouldExpandUpperBound() {
+        Range r = new Range(5, 15);
+        Range expanded = Range.expandToInclude(r, 20);
+        assertEquals(new Range(5, 20), expanded);
+    }
+
+    @Test
+    public void testExpandToInclude_ValueBelowRange_ShouldExpandLowerBound() {
+        Range r = new Range(5, 15);
+        Range expanded = Range.expandToInclude(r, 2);
+        assertEquals(new Range(2, 15), expanded);
+    }
+
+    @Test
+    public void testHashCode_TwoIdenticalRanges_ShouldHaveSameHashCode() {
+        Range r1 = new Range(3, 7);
+        Range r2 = new Range(3, 7);
+        assertEquals(r1.hashCode(), r2.hashCode());
+    }
+
+    @Test
+    public void testEquals_SameBounds_ShouldReturnTrue() {
+        Range r1 = new Range(3, 7);
+        Range r2 = new Range(3, 7);
+        assertTrue(r1.equals(r2));
+    }
+
+    @Test
+    public void testEquals_DifferentBounds_ShouldReturnFalse() {
+        Range r1 = new Range(3, 7);
+        Range r2 = new Range(4, 7);
+        assertFalse(r1.equals(r2));
+    }
+    
+    @Test
+    public void testCombineBothNullReturnsNull1() {
+        assertNull("Combining two null ranges should return null.", Range.combine(null, null));
+    }
+
+    @Test
+    public void testCombineFirstNullReturnsSecondRange1() {
+        Range range2 = new Range(2, 5);
+        assertEquals("Combining null with a valid range should return the valid range.", range2, Range.combine(null, range2));
+    }
+
+    @Test
+    public void testCombineSecondNullReturnsFirstRange1() {
+        Range range1 = new Range(3, 8);
+        assertEquals("Combining a valid range with null should return the valid range.", range1, Range.combine(range1, null));
+    }
+    
+
+    @Test
+    public void testExpand_ShouldExpandBothSides() {
+        Range r = new Range(5, 15);
+        Range expanded = Range.expand(r, 0.5, 0.5);
+        assertEquals(new Range(0, 20), expanded);
+    }
+    
+    @Test
+    public void testExpand_ShouldExpandLowerOnly() {
+        Range r = new Range(5, 15);
+        Range expanded = Range.expand(r, 0.5, 0);
+        assertEquals(new Range(0, 15), expanded);
+    }
+    
+    @Test
+    public void testExpand_ShouldExpandUpperOnly() {
+        Range r = new Range(5, 15);
+        Range expanded = Range.expand(r, 0, 0.5);
+        assertEquals(new Range(5, 20), expanded);
+    }
+    
+    @Test
+    public void testIntersects_OverlappingRanges_ShouldReturnTrue() {
+        Range r = new Range(2, 6);
+        assertTrue(r.intersects(4, 8));
+    }
+    
+    @Test
+    public void testIntersects_NonOverlappingRanges_ShouldReturnFalse() {
+        Range r = new Range(2, 6);
+        assertFalse(r.intersects(7, 9));
+    }
+    
+    @Test
+    public void testIntersects_TouchingEdges_ShouldReturnTrue() {
+        Range r = new Range(2, 6);
+        assertTrue(r.intersects(6, 9));
+    }
+    
+    @Test
+    public void testCombine_TwoValidRanges_ShouldMerge() {
+        Range r1 = new Range(2, 5);
+        Range r2 = new Range(4, 8);
+        Range result = Range.combine(r1, r2);
+        assertEquals(new Range(2, 8), result);
+    }
+    
+    @Test
+    public void testCombine_FirstRangeNull_ShouldReturnSecond() {
+        Range r2 = new Range(4, 8);
+        assertEquals(r2, Range.combine(null, r2));
+    }
+    
+    @Test
+    public void testCombine_SecondRangeNull_ShouldReturnFirst() {
+        Range r1 = new Range(4, 8);
+        assertEquals(r1, Range.combine(r1, null));
+    }
+    
+    @Test
+    public void testCombine_BothRangesNull_ShouldReturnNull() {
+        assertNull(Range.combine(null, null));
+    }
+    
+    @Test
+    public void testIntersects_OneInsideAnother_ShouldReturnTrue() {
+        Range r = new Range(2, 10);
+        assertTrue("A range inside another should return true", r.intersects(4, 8));
+    }
+
+    @Test
+    public void testIntersects_BoundaryMatches_ShouldReturnTrue() {
+        Range r = new Range(3, 7);
+        assertTrue("A range matching the boundary should return true", r.intersects(3, 7));
+    }
+    
+    @Test
+    public void testShift_BelowZeroWithZeroCrossingAllowed() {
+        Range r = new Range(-2, 5);
+        Range shifted = Range.shift(r, -3, true);
+        assertEquals(new Range(-5, 2), shifted);
+    }
+
+    @Test
+    public void testShift_BelowZeroWithZeroCrossingDisallowed() {
+        Range r = new Range(-2, 5);
+        Range shifted = Range.shift(r, -3, false);
+        assertEquals(new Range(0, 5), shifted);
+    }
+
+    @Test
+    public void testExpandToInclude_BothSidesExpansion() {
+        Range r = new Range(3, 8);
+        Range expanded = Range.expandToInclude(r, 10);
+        expanded = Range.expandToInclude(expanded, 2);
+        assertEquals(new Range(2, 10), expanded);
+    }
+
+    @Test
+    public void testExpandToInclude_NoChange() {
+        Range r = new Range(3, 8);
+        Range expanded = Range.expandToInclude(r, 5);
+        assertEquals("Value inside range should not expand it", new Range(3, 8), expanded);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testScale_NegativeFactor_ShouldThrowException() {
+        Range r = new Range(2, 6);
+        Range.scale(r, -1);
+    }
+
+    @Test
+    public void testIntersects_InputRangeBefore_ShouldReturnFalse() {
+        Range r = new Range(5, 10);
+        assertFalse("Range completely before should return false", r.intersects(1, 4));
+    }
+
+    @Test
+    public void testIntersects_InputRangeAfter_ShouldReturnFalse() {
+        Range r = new Range(5, 10);
+        assertFalse("Range completely after should return false", r.intersects(11, 15));
+    }
+
+    @Test
+    public void testCombine_IdenticalRanges_ShouldReturnSameRange() {
+        Range r1 = new Range(3, 8);
+        Range r2 = new Range(3, 8);
+        assertEquals("Combining identical ranges should return the same range", r1, Range.combine(r1, r2));
+    }
+
+    @Test
+    public void testCombine_OneInsideAnother_ShouldReturnOuterRange() {
+        Range outer = new Range(2, 10);
+        Range inner = new Range(4, 8);
+        assertEquals("Combining an inner range should return the outer range", outer, Range.combine(outer, inner));
+    }
+
+    @Test
+    public void testShift_AlignsWithZero() {
+        Range r = new Range(-5, 5);
+        Range shifted = Range.shift(r, 5, false);
+        assertEquals("Range should start at 0 after shifting", new Range(0, 10), shifted);
+    }
+
+    @Test
+    public void testShift_LargePositiveDelta() {
+        Range r = new Range(-5, 5);
+        Range shifted = Range.shift(r, 20);
+        assertEquals("Range should move completely into positive territory", new Range(15, 25), shifted);
+    }
+
+    @Test
+    public void testScale_ByOne_ShouldRemainSame() {
+        Range r = new Range(3, 7);
+        Range scaled = Range.scale(r, 1.0);
+        assertEquals("Scaling by 1 should keep the range unchanged", new Range(3, 7), scaled);
+    }
+
+    @Test
+    public void testScale_ByLargeFactor_ShouldExpand() {
+        Range r = new Range(2, 6);
+        Range scaled = Range.scale(r, 10);
+        assertEquals("Scaling by 10 should expand the range", new Range(20, 60), scaled);
+    }
+
+    @Test
+    public void testIntersects_ExactBoundaryMatch_ShouldReturnTrue() {
+        Range r = new Range(5, 10);
+        assertTrue("Intersection at exact boundary should return true", r.intersects(10, 15));
+    }
+
+    @Test
+    public void testIntersects_TouchingButNoOverlap_ShouldReturnFalse() {
+        Range r = new Range(5, 10);
+        assertFalse("Ranges touching at boundary but not overlapping should return false", r.intersects(10, 10));
+    }
+
+    @Test
+    public void testShift_ZeroDelta_ShouldRemainSame() {
+        Range r = new Range(3, 8);
+        Range shifted = Range.shift(r, 0);
+        assertEquals("Shifting by zero should keep the same range", new Range(3, 8), shifted);
+    }
+
+    @Test
+    public void testShift_PositiveShiftWithZeroCrossingDisabled() {
+        Range r = new Range(-4, 4);
+        Range shifted = Range.shift(r, 6, false);
+        assertEquals("Shifting by 6 should stop at zero for lower bound", new Range(0, 10), shifted);
+    }
+
+    @Test
+    public void testExpand_OnlyLower_ShouldExpandDownward() {
+        Range r = new Range(4, 12);
+        Range expanded = Range.expand(r, 0.5, 0.0);
+        assertEquals("Expanding only lower should extend downward", new Range(-2, 12), expanded);
+    }
+
+    @Test
+    public void testExpand_OnlyUpper_ShouldExpandUpward() {
+        Range r = new Range(4, 12);
+        Range expanded = Range.expand(r, 0.0, 0.5);
+        assertEquals("Expanding only upper should extend upward", new Range(4, 18), expanded);
+    }
+
+    @Test
+    public void testCombine_OneRangeNull_ShouldReturnOtherRange() {
+        Range r = new Range(2, 10);
+        assertEquals("Combining with null should return the non-null range", r, Range.combine(r, null));
+    }
+
+    
+
 }
