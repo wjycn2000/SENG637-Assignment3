@@ -531,11 +531,11 @@ For each method, we present:
 
 ### Data flow graph and def-use sets {#data-flow-graph-and-def-use-sets}
 
-![](media/2.4 DataUtilities.calculateColumnTotal().png)
+![](media/DataUtilities.calculateColumnTotal().png)
 
 ### DU-pairs per variable {#du-pairs-per-variable}
 
-![](media/DU-pairs per variable.png)
+![](media/DU-pairs.png)
 
 ### for each test case show which pairs are covered: {#for-each-test-case-show-which-pairs-are-covered:}
 
@@ -545,7 +545,7 @@ For each method, we present:
 
 #### dpu {#dpu}
 
-![][image4]
+![](media/dpu.png)
 
 ---
 
@@ -831,15 +831,14 @@ We focused on the following coverage metrics:
 
 ## **5.2 Range Final Coverage Report Summary** {#5.2-range-final-coverage-report-summary}
 
-![][image5]
-
+![](media/Range-Summary.png)
 ---
 
 ## 5.3 DataUtilities **Final Coverage Report Summary** {#5.3-datautilities-final-coverage-report-summary}
 
-![][image6]
+![](media/DataUtilitiesSummary.png)
 
-![][image7]
+![](media/DataUtilitiesSummary2.png)
 
 The line coverage is 89.6% which is close to 90%. The only reason it does not go over 90% is because some code in DataUtilities class is not reachable. For example, in the following code fragment, the “total \= 100.0” is not reachable in any case:
 
