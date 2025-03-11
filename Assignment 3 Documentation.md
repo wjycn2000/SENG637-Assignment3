@@ -439,6 +439,8 @@ For each method, we present:
 
 ---
 
+![](media/FlowGraphequals.png)
+
 ### **2.2.2 Definition-Use (DU) Sets Per Statement** {#2.2.2-definition-use-(du)-sets-per-statement}
 
 | Variable | Definition (Def) | Use (U) | Type (c-use/p-use) |
@@ -492,6 +494,8 @@ For each method, we present:
 | :---- |
 
 ---
+
+![](media/FlowGraphcontains.png)
 
 ### **2.3.2 Definition-Use (DU) Sets Per Statement** {#2.3.2-definition-use-(du)-sets-per-statement}
 
