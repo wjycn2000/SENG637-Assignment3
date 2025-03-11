@@ -2,6 +2,13 @@
 
 **Lab. Report \#3 – Code Coverage, Adequacy Criteria and Test Case Correlation**
 
+| Group: 18      |
+|-----------------|
+| Abubakar Khalid      |
+| Ahmed Shehata      |
+| Jinyu Wang      |
+| Mohammad Abu Saleh      |
+
 [1\. Introduction](#1.-introduction)
 
 [Objective of the Assignment](#objective-of-the-assignment)
