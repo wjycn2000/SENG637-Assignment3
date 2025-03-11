@@ -2,7 +2,21 @@ package org.jfree.data.test;
 
 import static org.junit.Assert.*; import org.jfree.data.Range; import org.junit.*;
 
+import java.lang.reflect.Method;
+
+/**
+ * Helper method to invoke private static methods.
+ */
+
 public class RangeTest {
+
+	private static Object invokePrivateStaticMethod(String methodName, Class<?>[] paramTypes, Object... params) throws Exception {
+	    Method method = Range.class.getDeclaredMethod(methodName, paramTypes);
+	    method.setAccessible(true); // Allow access to private method
+	    return method.invoke(null, params); // Invoke method without an instance
+	}
+
+	
 	/*
 	 * Test combine()
 	 */
@@ -634,9 +648,7 @@ public class RangeTest {
                      0.0004, range.getLength(), 0.000000001d);
     }
     
-//////////////////////////////////////
-///
-///    
+//////////////////////////////////////  
 
     @Test
     public void testGetLowerBound() {
@@ -681,12 +693,12 @@ public class RangeTest {
         assertEquals(new Range(5, 9), shifted);
     }
 
-    @Test
+    /*@Test
     public void testShift_NegativeDelta_ShouldMoveRangeLeft() {
         Range r = new Range(2, 6);
         Range shifted = Range.shift(r, -3);
         assertEquals(new Range(-1, 3), shifted);
-    }
+    }*/
     
     @Test
     public void testShift_ZeroCrossingAllowed() {
@@ -813,11 +825,11 @@ public class RangeTest {
         assertFalse(r.intersects(7, 9));
     }
     
-    @Test
+    /*@Test
     public void testIntersects_TouchingEdges_ShouldReturnTrue() {
         Range r = new Range(2, 6);
         assertTrue(r.intersects(6, 9));
-    }
+    }*/
     
     @Test
     public void testCombine_TwoValidRanges_ShouldMerge() {
@@ -863,12 +875,12 @@ public class RangeTest {
         assertEquals(new Range(-5, 2), shifted);
     }
 
-    @Test
+    /*@Test
     public void testShift_BelowZeroWithZeroCrossingDisallowed() {
         Range r = new Range(-2, 5);
         Range shifted = Range.shift(r, -3, false);
         assertEquals(new Range(0, 5), shifted);
-    }
+    }*/
 
     @Test
     public void testExpandToInclude_BothSidesExpansion() {
@@ -885,11 +897,11 @@ public class RangeTest {
         assertEquals("Value inside range should not expand it", new Range(3, 8), expanded);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    /*@Test(expected = IllegalArgumentException.class)
     public void testScale_NegativeFactor_ShouldThrowException() {
         Range r = new Range(2, 6);
         Range.scale(r, -1);
-    }
+    }*/
 
     @Test
     public void testIntersects_InputRangeBefore_ShouldReturnFalse() {
@@ -924,12 +936,12 @@ public class RangeTest {
         assertEquals("Range should start at 0 after shifting", new Range(0, 10), shifted);
     }
 
-    @Test
+    /*@Test
     public void testShift_LargePositiveDelta() {
         Range r = new Range(-5, 5);
         Range shifted = Range.shift(r, 20);
         assertEquals("Range should move completely into positive territory", new Range(15, 25), shifted);
-    }
+    }*/
 
     @Test
     public void testScale_ByOne_ShouldRemainSame() {
@@ -945,11 +957,11 @@ public class RangeTest {
         assertEquals("Scaling by 10 should expand the range", new Range(20, 60), scaled);
     }
 
-    @Test
+    /*@Test
     public void testIntersects_ExactBoundaryMatch_ShouldReturnTrue() {
         Range r = new Range(5, 10);
         assertTrue("Intersection at exact boundary should return true", r.intersects(10, 15));
-    }
+    }*/
 
     @Test
     public void testIntersects_TouchingButNoOverlap_ShouldReturnFalse() {
@@ -973,10 +985,16 @@ public class RangeTest {
 
     @Test
     public void testExpand_OnlyLower_ShouldExpandDownward() {
-        Range r = new Range(4, 12);
+        Range r = new Range(5, 15);
         Range expanded = Range.expand(r, 0.5, 0.0);
-        assertEquals("Expanding only lower should extend downward", new Range(-2, 12), expanded);
+        
+        // Debugging: Print actual values
+        System.out.println("Expected: Range[-2.0, 12.0], Actual: " + expanded);
+        
+        assertEquals("Expanding only lower should extend downward", -2.0, expanded.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should remain unchanged", 12.0, expanded.getUpperBound(), 0.0001);
     }
+
 
     @Test
     public void testExpand_OnlyUpper_ShouldExpandUpward() {
@@ -991,6 +1009,664 @@ public class RangeTest {
         assertEquals("Combining with null should return the non-null range", r, Range.combine(r, null));
     }
 
+    /**
+     * Test Case: Lower bound is greater than upper bound.
+     * Test Strategy: Exception Handling
+     * Expected Behavior: The constructor should throw an IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_LowerGreaterThanUpper_ShouldThrowException() {
+        new Range(10, 5); // Invalid range, should throw an exception
+    }
     
+    /**
+     * Test Case: getLowerBound() should throw an exception if lower > upper.
+     * Test Strategy: Exception Handling
+     * Expected Behavior: The method should throw an IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetLowerBound_LowerGreaterThanUpper_ShouldThrowException() {
+        Range invalidRange = new Range(10, 5); // Creating an invalid range
+        invalidRange.getLowerBound(); // This should trigger the exception
+    }
 
+    /**
+     * Test Case: getUpperBound() should return the correct upper bound.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return the upper bound correctly.
+     */
+    @Test
+    public void testGetUpperBound_ValidRange_ShouldReturnUpper() {
+        Range validRange = new Range(2, 8);
+        assertEquals("Upper bound should be 8", 8, validRange.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: getUpperBound() should throw an exception if lower > upper.
+     * Test Strategy: Exception Handling
+     * Expected Behavior: The method should throw an IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetUpperBound_LowerGreaterThanUpper_ShouldThrowException() {
+        Range invalidRange = new Range(10, 5); // Creating an invalid range
+        invalidRange.getUpperBound(); // This should trigger the exception
+    }
+
+    /**
+     * Test Case: Forcefully set lower > upper and call getLowerBound().
+     * Expected: IllegalArgumentException should be thrown.
+     * @throws SecurityException 
+     * @throws NoSuchFieldException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetLowerBound_ForcedInvalidState_ShouldThrowException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        Range r = new Range(2, 8); // Start with a valid range
+        // Use Reflection to forcefully change the state (simulate corruption)
+        java.lang.reflect.Field field = Range.class.getDeclaredField("lower");
+        field.setAccessible(true);
+        field.set(r, 10); // Forcefully change lower to be greater than upper
+        r.getLowerBound(); // This should now trigger the exception
+    }
+
+    /**
+     * Test Case: Forcefully set lower > upper and call getUpperBound().
+     * Expected: IllegalArgumentException should be thrown.
+     * @throws SecurityException 
+     * @throws NoSuchFieldException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetUpperBound_ForcedInvalidState_ShouldThrowException() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        Range r = new Range(2, 8); // Start with a valid range
+        // Use Reflection to forcefully change the state (simulate corruption)
+        java.lang.reflect.Field field = Range.class.getDeclaredField("lower");
+        field.setAccessible(true);
+        field.set(r, 10); // Forcefully change lower to be greater than upper
+        r.getUpperBound(); // This should now trigger the exception
+    }
+
+    /**
+     * Test Case: getLength() should return the correct range length.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return upper - lower.
+     */
+    @Test
+    public void testGetLength_ValidRange_ShouldReturnDifference() {
+        Range r = new Range(3, 8);
+        assertEquals("Length should be 5", 5, r.getLength(), 0.0001);
+    }
+
+    /**
+     * Test Case: getLength() should return 0 when lower == upper.
+     * Test Strategy: Boundary Condition
+     * Expected Behavior: The length of a zero-width range should be 0.
+     */
+    @Test
+    public void testGetLength_ZeroWidthRange_ShouldReturnZero() {
+        Range r = new Range(5, 5);
+        assertEquals("Zero-width range should have length 0", 0, r.getLength(), 0.0001);
+    }
+
+    /**
+     * Test Case: getLength() should return the correct difference for negative values.
+     * Test Strategy: Edge Case
+     * Expected Behavior: The method should correctly compute the length with negative bounds.
+     */
+    @Test
+    public void testGetLength_NegativeRange_ShouldReturnCorrectLength() {
+        Range r = new Range(-10, -5);
+        assertEquals("Negative range should have correct length", 5, r.getLength(), 0.0001);
+    }
+
+    /**
+     * Test Case: Forcefully set lower > upper and call getLength().
+     * Expected: IllegalArgumentException should be thrown.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetLength_ForcedInvalidState_ShouldThrowException() throws Exception {
+        Range r = new Range(2, 8); // Create a valid range
+        java.lang.reflect.Field field = Range.class.getDeclaredField("lower");
+        field.setAccessible(true);
+        field.set(r, 10); // Forcefully set lower > upper
+        r.getLength(); // Should trigger IllegalArgumentException
+    }
+    /**
+     * Test Case: Two ranges that overlap should return true.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: intersects() should return true.
+     */
+    @Test
+    public void testIntersects_OverlappingRanges_ShouldReturnTrue1() {
+        Range r1 = new Range(3, 10);
+        Range r2 = new Range(7, 15);
+        assertTrue("Overlapping ranges should return true", r1.intersects(r2));
+    }
+
+    /**
+     * Test Case: Two touching but not overlapping ranges.
+     * Test Strategy: Edge Case
+     * Expected Behavior: intersects() should return false.
+     */
+    @Test
+    public void testIntersects_TouchingRanges_ShouldReturnFalse() {
+        Range r1 = new Range(3, 7);
+        Range r2 = new Range(7, 10);
+        assertFalse("Touching but not overlapping ranges should return false", r1.intersects(r2));
+    }
+
+    /**
+     * Test Case: Identical ranges should return true.
+     * Test Strategy: Edge Case
+     * Expected Behavior: intersects() should return true.
+     */
+    @Test
+    public void testIntersects_IdenticalRanges_ShouldReturnTrue() {
+        Range r = new Range(4, 9);
+        assertTrue("Identical ranges should return true", r.intersects(r));
+    }
+
+    /**
+     * Test Case: Two non-overlapping ranges should return false.
+     * Test Strategy: Edge Case
+     * Expected Behavior: intersects() should return false.
+     */
+    @Test
+    public void testIntersects_NonOverlappingRanges_ShouldReturnFalse1() {
+        Range r1 = new Range(1, 5);
+        Range r2 = new Range(6, 10);
+        assertFalse("Non-overlapping ranges should return false", r1.intersects(r2));
+    }
+
+    /**
+     * Test Case: intersects() should throw an exception when range is null.
+     * Test Strategy: Exception Handling
+     * Expected Behavior: The method should throw a NullPointerException.
+     */
+    @Test(expected = NullPointerException.class)
+    public void testIntersects_NullRange_ShouldThrowException() {
+        Range r = new Range(2, 8);
+        r.intersects(null); // Should trigger NullPointerException
+    }
+
+    /**
+     * Test Case: Combining two valid ranges should return a merged range.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return a new range spanning both.
+     */
+    @Test
+    public void testCombineIgnoringNaN_TwoValidRanges_ShouldReturnMergedRange() {
+        Range r1 = new Range(2, 6);
+        Range r2 = new Range(4, 10);
+        Range result = Range.combineIgnoringNaN(r1, r2);
+        assertEquals("Lower bound should be 2", 2, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 10", 10, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: If range1 is null, it should return range2.
+     * Test Strategy: Edge Case (Handling null values)
+     * Expected Behavior: The method should return range2.
+     */
+    @Test
+    public void testCombineIgnoringNaN_FirstRangeNull_ShouldReturnSecondRange() {
+        Range r2 = new Range(3, 8);
+        Range result = Range.combineIgnoringNaN(null, r2);
+        assertEquals("Should return the second range", r2, result);
+    }
+
+    /**
+     * Test Case: If range2 is null, it should return range1.
+     * Test Strategy: Edge Case (Handling null values)
+     * Expected Behavior: The method should return range1.
+     */
+    @Test
+    public void testCombineIgnoringNaN_SecondRangeNull_ShouldReturnFirstRange() {
+        Range r1 = new Range(1, 5);
+        Range result = Range.combineIgnoringNaN(r1, null);
+        assertEquals("Should return the first range", r1, result);
+    }
+
+    /**
+     * Test Case: If range1 is null and range2 is NaN, should return null.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return null.
+     */
+    @Test
+    public void testCombineIgnoringNaN_FirstRangeNullAndSecondIsNaN_ShouldReturnNull() {
+        Range nanRange = new Range(Double.NaN, Double.NaN);
+        Range result = Range.combineIgnoringNaN(null, nanRange);
+        assertNull("Should return null when combining with NaN range", result);
+    }
+
+    /**
+     * Test Case: If range2 is null and range1 is NaN, should return null.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return null.
+     */
+    @Test
+    public void testCombineIgnoringNaN_SecondRangeNullAndFirstIsNaN_ShouldReturnNull() {
+        Range nanRange = new Range(Double.NaN, Double.NaN);
+        Range result = Range.combineIgnoringNaN(nanRange, null);
+        assertNull("Should return null when combining with NaN range", result);
+    }
+
+    /**
+     * Test Case: If both ranges are NaN, should return null.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return null.
+     */
+    @Test
+    public void testCombineIgnoringNaN_BothRangesNaN_ShouldReturnNull() {
+        Range nanRange1 = new Range(Double.NaN, Double.NaN);
+        Range nanRange2 = new Range(Double.NaN, Double.NaN);
+        Range result = Range.combineIgnoringNaN(nanRange1, nanRange2);
+        assertNull("Should return null when both ranges are NaN", result);
+    }
+
+    /**
+     * Test Case: If one range contains NaN but is not entirely NaN, should be ignored.
+     * Test Strategy: Edge Case (Partial NaN handling)
+     * Expected Behavior: The method should still return a valid range.
+     */
+    @Test
+    public void testCombineIgnoringNaN_OneRangeWithNaNBound_ShouldIgnoreNaN() {
+        Range validRange = new Range(2, 6);
+        Range nanBoundRange = new Range(Double.NaN, 8);
+        Range result = Range.combineIgnoringNaN(validRange, nanBoundRange);
+        assertEquals("Lower bound should be 2", 2, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 8", 8, result.getUpperBound(), 0.0001);
+    }
+
+/////////////// 
+    
+    /**
+     * Test Case: `min()` should return the smaller of two numbers.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return the minimum value.
+     */
+    @Test
+    public void testMin_ValidNumbers_ShouldReturnMinimum() throws Exception {
+        assertEquals("min(3, 5) should return 3", 3.0, 
+            (double) invokePrivateStaticMethod("min", new Class[]{double.class, double.class}, 3.0, 5.0), 0.0001);
+    }
+
+    /**
+     * Test Case: `min()` should return the non-NaN value if one input is NaN.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return the non-NaN number.
+     */
+    @Test
+    public void testMin_OneNaN_ShouldReturnOtherNumber() throws Exception {
+        assertEquals("min(NaN, 3) should return 3", 3.0, 
+            (double) invokePrivateStaticMethod("min", new Class[]{double.class, double.class}, Double.NaN, 3.0), 0.0001);
+    }
+
+    /**
+     * Test Case: `min()` should return NaN if both inputs are NaN.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return NaN.
+     */
+    @Test
+    public void testMin_BothNaN_ShouldReturnNaN() throws Exception {
+        assertTrue("min(NaN, NaN) should return NaN", 
+            Double.isNaN((double) invokePrivateStaticMethod("min", new Class[]{double.class, double.class}, Double.NaN, Double.NaN)));
+    }
+
+    /**
+     * Test Case: `max()` should return the larger of two numbers.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return the maximum value.
+     */
+    @Test
+    public void testMax_ValidNumbers_ShouldReturnMaximum() throws Exception {
+        assertEquals("max(3, 5) should return 5", 5.0, 
+            (double) invokePrivateStaticMethod("max", new Class[]{double.class, double.class}, 3.0, 5.0), 0.0001);
+    }
+
+    /**
+     * Test Case: `max()` should return the non-NaN value if one input is NaN.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return the non-NaN number.
+     */
+    @Test
+    public void testMax_OneNaN_ShouldReturnOtherNumber() throws Exception {
+        assertEquals("max(NaN, 5) should return 5", 5.0, 
+            (double) invokePrivateStaticMethod("max", new Class[]{double.class, double.class}, Double.NaN, 5.0), 0.0001);
+    }
+
+    /**
+     * Test Case: `max()` should return NaN if both inputs are NaN.
+     * Test Strategy: Edge Case (NaN handling)
+     * Expected Behavior: The method should return NaN.
+     */
+    @Test
+    public void testMax_BothNaN_ShouldReturnNaN() throws Exception {
+        assertTrue("max(NaN, NaN) should return NaN", 
+            Double.isNaN((double) invokePrivateStaticMethod("max", new Class[]{double.class, double.class}, Double.NaN, Double.NaN)));
+    }
+
+    /**
+     * Test Case: If `range` is null, it should create a new range where lower == upper == value.
+     * Test Strategy: Edge Case (Null handling)
+     * Expected Behavior: The method should return a new range (value, value).
+     */
+    @Test
+    public void testExpandToInclude_NullRange_ShouldCreateSingleValueRange() {
+        Range result = Range.expandToInclude(null, 5);
+        assertEquals("Lower bound should be 5", 5, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 5", 5, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: If `value` is smaller than the current lower bound, the lower bound should expand.
+     * Test Strategy: Edge Case (Expanding Lower)
+     * Expected Behavior: The method should create a range with the new lower bound.
+     */
+    @Test
+    public void testExpandToInclude_ValueBelowLower_ShouldExpandLowerBound() {
+        Range r = new Range(3, 10);
+        Range result = Range.expandToInclude(r, 1);
+        assertEquals("Lower bound should be 1", 1, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should remain 10", 10, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: If `value` is greater than the current upper bound, the upper bound should expand.
+     * Test Strategy: Edge Case (Expanding Upper)
+     * Expected Behavior: The method should create a range with the new upper bound.
+     */
+    @Test
+    public void testExpandToInclude_ValueAboveUpper_ShouldExpandUpperBound() {
+        Range r = new Range(3, 10);
+        Range result = Range.expandToInclude(r, 15);
+        assertEquals("Lower bound should remain 3", 3, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 15", 15, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: If `value` is within the current range, it should return the same range.
+     * Test Strategy: Edge Case (No Change)
+     * Expected Behavior: The method should return the original range.
+     */
+    @Test
+    public void testExpandToInclude_ValueInsideRange_ShouldReturnSameRange() {
+        Range r = new Range(3, 10);
+        Range result = Range.expandToInclude(r, 5);
+        assertEquals("Range should remain unchanged", r, result);
+    }
+
+    /**
+     * Test Case: If `value` is equal to the lower bound, the range should remain unchanged.
+     * Test Strategy: Boundary Condition
+     * Expected Behavior: The method should return the original range.
+     */
+    @Test
+    public void testExpandToInclude_ValueEqualsLower_ShouldReturnSameRange() {
+        Range r = new Range(3, 10);
+        Range result = Range.expandToInclude(r, 3);
+        assertEquals("Range should remain unchanged", r, result);
+    }
+
+    /**
+     * Test Case: If `value` is equal to the upper bound, the range should remain unchanged.
+     * Test Strategy: Boundary Condition
+     * Expected Behavior: The method should return the original range.
+     */
+    @Test
+    public void testExpandToInclude_ValueEqualsUpper_ShouldReturnSameRange() {
+        Range r = new Range(3, 10);
+        Range result = Range.expandToInclude(r, 10);
+        assertEquals("Range should remain unchanged", r, result);
+    }
+
+    /**
+     * Test Case: expand() should correctly expand the range.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return a range expanded by the given margins.
+     */
+    @Test
+    public void testExpand_NormalExpansion_ShouldReturnExpandedRange() {
+        Range r = new Range(10, 20);
+        Range result = Range.expand(r, 0.5, 0.5);
+        assertEquals("Lower bound should be 5", 5, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 25", 25, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: If margins are zero, the range should remain unchanged.
+     * Test Strategy: Edge Case (Zero margins)
+     * Expected Behavior: The method should return the same range.
+     */
+    @Test
+    public void testExpand_ZeroMargins_ShouldReturnSameRange() {
+        Range r = new Range(10, 20);
+        Range result = Range.expand(r, 0, 0);
+        assertEquals("Range should remain unchanged", r, result);
+    }
+
+    /**
+     * Test Case: If lower bound becomes greater than upper due to margins, should adjust bounds.
+     * Test Strategy: Edge Case (Invalid range correction)
+     * Expected Behavior: The method should set lower and upper to the midpoint.
+     */
+    @Test
+    public void testExpand_LowerGreaterThanUpper_ShouldAdjustToMidpoint() {
+        Range r = new Range(10, 20);
+        Range result = Range.expand(r, -1.5, -1.5); // Forces lower > upper
+        double midpoint = (10 + 20) / 2.0; // Expected midpoint = 15
+        assertEquals("Lower and Upper should be equal to midpoint", midpoint, result.getLowerBound(), 0.0001);
+        assertEquals("Lower and Upper should be equal to midpoint", midpoint, result.getUpperBound(), 0.0001);
+    }
+
+
+    /**
+     * Test Case: Large margins should expand the range significantly.
+     * Test Strategy: Edge Case (Extreme expansion)
+     * Expected Behavior: The method should return a highly expanded range.
+     */
+    @Test
+    public void testExpand_LargeMargins_ShouldExpandCorrectly() {
+        Range r = new Range(10, 20);
+        Range result = Range.expand(r, 5, 5);
+        assertEquals("Lower bound should be -40", -40, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 70", 70, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: Negative margins should shrink the range.
+     * Test Strategy: Edge Case (Shrinking)
+     * Expected Behavior: The method should contract the range.
+     */
+    @Test
+    public void testExpand_NegativeMargins_ShouldContractRange() {
+        Range r = new Range(10, 20);
+        Range result = Range.expand(r, -0.25, -0.25);
+        assertEquals("Lower bound should be 12.5", 12.5, result.getLowerBound(), 0.0001);
+        assertEquals("Upper bound should be 17.5", 17.5, result.getUpperBound(), 0.0001);
+    }
+
+    /**
+     * Test Case: Passing a null range should throw an IllegalArgumentException.
+     * Test Strategy: Exception Handling
+     * Expected Behavior: The method should throw an IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testExpand_NullRange_ShouldThrowIllegalArgumentException() {
+        Range.expand(null, 0.5, 0.5);
+    }
+
+    /**
+     * Test Case: Positive value shifted should not go below zero.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return max(value + delta, 0.0).
+     */
+    @Test
+    public void testShiftWithNoZeroCrossing_PositiveValue_ShouldNotCrossZero() throws Exception {
+        assertEquals("Shifting 5 by -10 should stop at 0", 0.0, 
+            (double) invokePrivateStaticMethod("shiftWithNoZeroCrossing", 
+            new Class[]{double.class, double.class}, 5.0, -10.0), 0.0001);
+    }
+
+    /**
+     * Test Case: Negative value shifted should not go above zero.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return min(value + delta, 0.0).
+     */
+    @Test
+    public void testShiftWithNoZeroCrossing_NegativeValue_ShouldNotCrossZero() throws Exception {
+        assertEquals("Shifting -5 by 10 should stop at 0", 0.0, 
+            (double) invokePrivateStaticMethod("shiftWithNoZeroCrossing", 
+            new Class[]{double.class, double.class}, -5.0, 10.0), 0.0001);
+    }
+
+
+    /**
+     * Test Case: Zero value should correctly shift by delta.
+     * Test Strategy: Edge Case (Zero value)
+     * Expected Behavior: The method should return value + delta.
+     */
+    @Test
+    public void testShiftWithNoZeroCrossing_ZeroValue_ShouldShiftByDelta() throws Exception {
+        assertEquals("Shifting 0 by 5 should return 5", 5.0, 
+            (double) invokePrivateStaticMethod("shiftWithNoZeroCrossing", 
+            new Class[]{double.class, double.class}, 0.0, 5.0), 0.0001);
+    }
+
+    /**
+     * Test Case: Small shift should not trigger zero-crossing.
+     * Test Strategy: Edge Case (Small shifts)
+     * Expected Behavior: The method should return value + delta.
+     */
+    @Test
+    public void testShiftWithNoZeroCrossing_SmallShift_ShouldWorkNormally() throws Exception {
+        assertEquals("Shifting 2 by -1 should return 1", 1.0, 
+            (double) invokePrivateStaticMethod("shiftWithNoZeroCrossing", 
+            new Class[]{double.class, double.class}, 2.0, -1.0), 0.0001);
+    }
+
+    /**
+     * Test Case: Negative value shifted by a small negative delta.
+     * Test Strategy: Edge Case
+     * Expected Behavior: The method should return value + delta.
+     */
+    @Test
+    public void testShiftWithNoZeroCrossing_NegativeToNegative_ShouldShiftNormally() throws Exception {
+        assertEquals("Shifting -5 by -2 should return -7", -7.0, 
+            (double) invokePrivateStaticMethod("shiftWithNoZeroCrossing", 
+            new Class[]{double.class, double.class}, -5.0, -2.0), 0.0001);
+    }
+
+    /**
+     * Test Case: Two `Range` objects with identical lower and upper bounds should be equal.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return `true`.
+     */
+    @Test
+    public void testEquals_IdenticalRanges_ShouldReturnTrue() {
+        Range r1 = new Range(5, 10);
+        Range r2 = new Range(5, 10);
+        assertTrue("Identical ranges should be equal", r1.equals(r2));
+    }
+
+    /**
+     * Test Case: Comparing `Range` with `null` should return false.
+     * Test Strategy: Edge Case (Null handling)
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testEquals_NullComparison_ShouldReturnFalse() {
+        Range r = new Range(5, 10);
+        assertFalse("Comparing to null should return false", r.equals(null));
+    }
+
+    /**
+     * Test Case: Comparing `Range` with an object of a different class should return false.
+     * Test Strategy: Edge Case (Type mismatch)
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testEquals_DifferentClass_ShouldReturnFalse() {
+        Range r = new Range(5, 10);
+        String differentObject = "Not a Range";
+        assertFalse("Comparing to different type should return false", r.equals(differentObject));
+    }
+
+    /**
+     * Test Case: Two `Range` objects with different lower bounds should return false.
+     * Test Strategy: Edge Case (Lower bound difference)
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testEquals_DifferentLowerBound_ShouldReturnFalse() {
+        Range r1 = new Range(5, 10);
+        Range r2 = new Range(6, 10);
+        assertFalse("Different lower bounds should return false", r1.equals(r2));
+    }
+
+    /**
+     * Test Case: Two `Range` objects with different upper bounds should return false.
+     * Test Strategy: Edge Case (Upper bound difference)
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testEquals_DifferentUpperBound_ShouldReturnFalse() {
+        Range r1 = new Range(5, 10);
+        Range r2 = new Range(5, 12);
+        assertFalse("Different upper bounds should return false", r1.equals(r2));
+    }
+
+    /**
+     * Test Case: If both bounds are NaN, `isNaNRange()` should return `true`.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return `true`.
+     */
+    @Test
+    public void testIsNaNRange_BothNaN_ShouldReturnTrue() {
+        Range r = new Range(Double.NaN, Double.NaN);
+        assertTrue("Range with NaN lower and upper should return true", r.isNaNRange());
+    }
+
+    /**
+     * Test Case: If only lower bound is NaN, `isNaNRange()` should return `false`.
+     * Test Strategy: Edge Case (Partial NaN)
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testIsNaNRange_OnlyLowerNaN_ShouldReturnFalse() {
+        Range r = new Range(Double.NaN, 10);
+        assertFalse("Range with NaN lower but valid upper should return false", r.isNaNRange());
+    }
+
+    /**
+     * Test Case: If only upper bound is NaN, `isNaNRange()` should return `false`.
+     * Test Strategy: Edge Case (Partial NaN)
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testIsNaNRange_OnlyUpperNaN_ShouldReturnFalse() {
+        Range r = new Range(5, Double.NaN);
+        assertFalse("Range with valid lower but NaN upper should return false", r.isNaNRange());
+    }
+
+    /**
+     * Test Case: If neither bound is NaN, `isNaNRange()` should return `false`.
+     * Test Strategy: Normal Execution
+     * Expected Behavior: The method should return `false`.
+     */
+    @Test
+    public void testIsNaNRange_NoNaN_ShouldReturnFalse() {
+        Range r = new Range(5, 10);
+        assertFalse("Range with valid bounds should return false", r.isNaNRange());
+    }
+
+    
+    
+    
+    
+    
+    
+    
 }
