@@ -155,6 +155,9 @@ public abstract class DataUtilities {
              int[] validRows) {
         ParamChecks.nullNotPermitted(data, "data");
         double total = 0.0;
+        if (total > 0) {
+        	total = 100.0;
+        }
 
         int rowCount = data.getRowCount();
         for (int v = 0; v < validRows.length; v++) {
