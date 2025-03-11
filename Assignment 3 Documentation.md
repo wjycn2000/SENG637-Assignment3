@@ -531,17 +531,17 @@ For each method, we present:
 
 ### Data flow graph and def-use sets {#data-flow-graph-and-def-use-sets}
 
-![][image1]
+![](media/2.4 DataUtilities.calculateColumnTotal().png)
 
 ### DU-pairs per variable {#du-pairs-per-variable}
 
-![][image2]
+![](media/DU-pairs per variable.png)
 
 ### for each test case show which pairs are covered: {#for-each-test-case-show-which-pairs-are-covered:}
 
 #### dcu {#dcu}
 
-![][image3]
+![](media/dcu.png)
 
 #### dpu {#dpu}
 
